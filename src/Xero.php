@@ -220,25 +220,29 @@ class Xero
      */
     protected function storeToken($token, $tenantData = null)
     {
-        $data = [
-            'id_token'      => $token['id_token'],
-            'access_token'  => $token['access_token'],
-            'expires_in'    => $token['expires_in'],
-            'token_type'    => $token['token_type'],
-            'refresh_token' => $token['refresh_token'],
-            'scopes'        => $token['scope']
-        ];
+        if($token && isset($token['id_token'])) {
+            $data = [
+                'id_token'      => $token['id_token'],
+                'access_token'  => $token['access_token'],
+                'expires_in'    => $token['expires_in'],
+                'token_type'    => $token['token_type'],
+                'refresh_token' => $token['refresh_token'],
+                'scopes'        => $token['scope']
+            ];
 
-        if ($this->tenant_id) {
-            $where = ['id' => $this->tenant_id];
-        } elseif ($tenantData !== null) {
-            $data  = array_merge($data, $tenantData);
-            $where = ['tenant_id' => $data['tenant_id']];
+            if ($this->tenant_id) {
+                $where = ['id' => $this->tenant_id];
+            } elseif ($tenantData !== null) {
+                $data  = array_merge($data, $tenantData);
+                $where = ['tenant_id' => $data['tenant_id']];
+            } else {
+                $where = ['id' => 1];
+            }
+
+            return XeroToken::updateOrCreate($where, $data);
         } else {
-            $where = ['id' => 1];
+            return false;
         }
-
-        return XeroToken::updateOrCreate($where, $data);
     }
 
     /**
